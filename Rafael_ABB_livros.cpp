@@ -10,9 +10,9 @@ typedef struct sNodo{
 }Nodo;
 
 Nodo* createRoot();					 //cria raiz da arvore
-void insert(Nodo* root, int data);   //insere livro
+Nodo* insert(Nodo* root, int data);  //insere livro
 int requestData();					 //solicita codigo do livro
-void del(Nodo* root, int data);		 //delete livro
+Nodo* del(Nodo* root, int data);	 //delete livro
 Nodo* search(Nodo* root, int data);  //pesquisa livro
 void printSearch(Nodo*);		     //imprime pesquisa
 
@@ -34,19 +34,21 @@ main(){
             case 1: system("clear||cls");
 					data= requestData();
 					system("clear||cls");
-					insert(root, data);
-					
-					printf("%d", root->data);
-					getch();
+					root= insert(root, data);
 					printf("\tLivro cadastrado com sucesso!\n\n");
+					printf("\tRaiz da arvore: %d \n\n", root->data);
 					op=0;
                     break;
 			
 			case 2: system("clear||cls");
 					data= requestData();
 					system("clear||cls");
-					del(search(root, data), data);
-					printf("\tLivro removido com sucesso!\n\n");
+					root= del(root, data);
+					if(root!=NULL){
+						printf("\tLivro \"%d\" removido com sucesso!\n\n", data);
+					}else{
+						printf("\tERRO, o livro \"%d\" nao existe!\n\n", data);
+					}
                     op=0;
 					break;
                     
@@ -65,68 +67,97 @@ main(){
                     break;
         }
     }
-	
 }
 
 Nodo* createRoot(){	
-	Nodo* root= (Nodo*)malloc(sizeof(Nodo));
-	root->left=NULL;
-	root->right=NULL;
-	root->data=NULL;
+	return NULL;
+}
+
+Nodo* insert(Nodo *root, int data){
+    
+	//Caso encontrar um espaço vazio, o nodo é inserido e finaliza o codigo
+	if(root == NULL){
+        root=(Nodo*)malloc(sizeof(Nodo));
+        root->data = data;
+        root->left = NULL;
+        root->right = NULL;
+    }
+    
+    //caso nao foi encontrado um espaço vazio, continua a percorrer a arvore através da recursividade
+    else if(data <= root->data){
+        root->left = insert(root->left, data); //percorre a arvore atraves do insert, até encontrar um ponteiro LEFT ou RIGHT que seja NULL
+    }
+    
+	else{
+        root->right = insert(root->right, data);
+    }
+    
 	return root;
 }
 
-void insert(Nodo* root, int data){
-	Nodo* new_nodo= createRoot();
-	new_nodo->data=data;
+Nodo* del(Nodo* root, int data){
 	
-	//insercao do primeiro elemento da arvore
-	if(root->data==NULL){
-		root=new_nodo;
-		return;
+	/*Nodo* nodo= search(root, data);
+	Nodo* aux;
+	
+	if((root==NULL) || (nodo==NULL)){
+		return NULL;
 	}
 	
-	//se existir elemento(s) na arvore, percorre ela
-	//ate achar um local para adicionar o new_nodo
-	else{
-		for(;;){
-			if(data <= root->data){
-				if(root->left==NULL){
-					root->left=new_nodo;
-					return;
-				}else{
-					root= root->left;
-				}
-			}else{
-				if(root->right==NULL){
-					root->right=new_nodo;
-					return;
-				}else{
-					root= root->right;
-				}
-			}
-		}
+	//se o nodo nao tem filhos, entao ele eh removido e termina o codigo
+	if((nodo->left == NULL) && (nodo->right == NULL)){
+		free(nodo);
+    }else{
+    	
+		//se houver algum filho, o nodo eh deletado e o filho passa a ocupar o lugar dele 
+		if(nodo->right == NULL){
+	        aux = nodo;
+	        printf("%d ", aux->data);
+	        nodo = nodo->left;
+	        printf("%d ", nodo->data);
+	        free(aux);
+	        printf("%d ", aux->data);
+	        getch();
+    	}
+    	
+		else if(nodo->left == NULL){
+		    aux = nodo;
+		    nodo = nodo->right;
+		    free(aux);
+    	}
+		
+		//se tiver os 2 filhos, procura-se o elemento mais a direita, na sub-arvore da esquerda
+		else{
+		    aux = nodo->left;
+		    while(aux->right != NULL){
+		        aux=aux->right;
+        	}
+        	
+        	//troca de valores
+        	nodo->data = aux->data;
+        	aux->data=data;
+        	nodo->left= del(nodo->left, data);
+    	}
 	}
-	
-}
-
-void del(Nodo* root, int data){
-	
+	return root;*/
 }
 
 Nodo* search(Nodo* root, int data){
 	
 	//se nao encontrar o livro, retorna NULL
-	if(root->data==NULL) return NULL;
+	if(root==NULL){
+		return NULL;
+	} 
 	
-	//se encontrou, vai retornar o elemento no final do codigo
-	if(root->data == data);
+	if(root->data == data){
+		return root; //se encontrou, vai retornar o elemento
+	} 
 	
-	//percorre a arvore usando recursividade
+	//se nao, percorre a arvore usando recursividade
 	else if(data <= root->data){
-		root->left= search(root->left, data);
+		root=search(root->left, data);
 	}else{
-		root->right= search(root->right, data);
+		root=search(root->right, data);
 	}
 	
 	return root;
@@ -140,9 +171,9 @@ int requestData(){
 }
 
 void printSearch(Nodo* nodo){
-	if(nodo!=NULL){
-		printf("\tLivro codigo: %d, encontrado!\n\n", nodo->data);
-	}else{
+	if(nodo==NULL){
 		printf("\tLivro inexistente!\n\n");
+	}else{
+		printf("\tLivro \"%d\" encontrado!\n\n", nodo->data);
 	}
 }
