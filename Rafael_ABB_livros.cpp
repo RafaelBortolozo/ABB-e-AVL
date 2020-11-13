@@ -16,6 +16,7 @@ typedef struct sNodo{
 }Nodo;
 
 Nodo* createRoot();					 //cria raiz da arvore
+Nodo* createNodo();					 //cria nodo
 Nodo* insert(Nodo* root, int data);  //insere livro
 int requestData();					 //solicita codigo do livro
 Nodo* del(Nodo* root, int data);	 //delete livro
@@ -94,8 +95,8 @@ main(){
 					break;
 					
 			case 7: system("clear||cls");
-					printf("Teste carregado! \n\n");
 					root= test(root);
+					printf("Teste carregado! \n\n");
 					op=0;
 					break;		
 			
@@ -112,25 +113,34 @@ Nodo* createRoot(){
 	return NULL;
 }
 
+Nodo* createNodo(){
+	Nodo* nodo = (Nodo*)malloc(sizeof(Nodo));
+    nodo->left = NULL;
+    nodo->right = NULL;
+    nodo->data = NULL;
+    return nodo;
+}
+
 Nodo* insert(Nodo *root, int data){
     
 	//Caso encontrar um espaço vazio, o nodo é inserido e finaliza o codigo
 	if(root == NULL){
-        root=(Nodo*)malloc(sizeof(Nodo));
-        root->data = data;
-        root->left = NULL;
-        root->right = NULL;
+        Nodo* aux= createNodo();
+        aux->data = data;
+        return aux;
     }
     
     //caso nao foi encontrado um espaço vazio, continua a percorrer a arvore através da recursividade
-    else if(data <= root->data){
-        root->left = insert(root->left, data); //percorre a arvore atraves do insert, até encontrar um ponteiro LEFT ou RIGHT que seja NULL
-    }
+    else{
+    	if(data <= root->data){
+        	root->left = insert(root->left, data); //percorre a arvore atraves do insert, até encontrar um ponteiro LEFT ou RIGHT que seja NULL
+    	}
     
-	else{
-        root->right = insert(root->right, data);
-    }
-    
+		else if(data > root->data){
+	        root->right = insert(root->right, data);
+	    }
+	} 
+	
 	return root;
 }
 
@@ -138,9 +148,9 @@ Nodo* del(Nodo* root, int data){
 	
 	if(root != NULL){
 		if(data > root->data){
-			root->right = del(root, data);
+			root->right = del(root->right, data);
 		}else if(data < root->data){
-			root->left = del(root, data);
+			root->left = del(root->left, data);
 		}else{
 			//elemento encontrado
 			//nodo com 0 filho
@@ -150,11 +160,11 @@ Nodo* del(Nodo* root, int data){
 			}
 			
 			//nodo com 1 filho
-			else if(root->left==NULL){
+			else if(root->left==NULL && root->right!=NULL){
 				Nodo* aux= root->right;
 				free(root);
 				return aux;
-			}else if(root->right==NULL){
+			}else if(root->left!=NULL && root->right==NULL){
 				Nodo* aux= root->left;
 				free(root);
 				return aux;
@@ -163,8 +173,9 @@ Nodo* del(Nodo* root, int data){
 			//nodo com 2 filhos
 			else{
 				Nodo* aux= searchMax(root->left);
-				root->data= aux->data;
-				root->left= del(root->left, aux->data);
+				int tmp= aux->data;
+				root= del(root, tmp);
+				root->data= tmp;
 			}
 		}
 		return root;
