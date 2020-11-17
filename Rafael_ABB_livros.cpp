@@ -27,6 +27,7 @@ void pre_ordem (Nodo* root);		 //Pre-ordem
 void em_ordem (Nodo* root);			 //Em-ordem
 void pos_ordem (Nodo* root);		 //Pos-ordem
 Nodo* test(Nodo* root);				 //carrega teste
+Nodo* free_tree(Nodo* root);		 //libera memoria
 
 main(){
 	Nodo* root= createRoot();
@@ -42,8 +43,9 @@ main(){
         printf("\t4)Pre-ordem\n");
         printf("\t5)Em-ordem\n");
         printf("\t6)Pos-ordem\n");
-        printf("\t7)TEST\n");
-        printf("\t8)Sair\n");
+        printf("\t7)Limpar sistema\n");
+        printf("\t8)TEST\n");
+        printf("\t9)Sair\n");
         
         scanf("%d",&op);
         switch (op){
@@ -52,20 +54,21 @@ main(){
 					system("clear||cls");
 					root= insert(root, data);
 					printf("\tLivro cadastrado com sucesso!\n\n");
-					printf("\tRaiz da arvore: %d \n\n", root->data);
 					op=0;
                     break;
 			
 			case 2: system("clear||cls");
 					data= requestData();
 					system("clear||cls");
+					aux=search(root, data);
 					root= del(root, data);
-					if(root!=NULL){
-						printf("\tLivro \"%d\" removido com sucesso!\n\n", data);
+					if(aux!=NULL){
+						printf("\tLivro \"%d\" removido!", data);
 					}else{
-						printf("delete Error", data);
+						printf("\tLivro nao encontrado!", data);
 					}
                     op=0;
+                    printf("\n\n");
 					break;
                     
 			case 3: system("clear||cls");
@@ -77,30 +80,45 @@ main(){
 					break;
 			
 			case 4: system("clear||cls");
-					printf("Pre-ordem: \n\n");
+					printf("\tPre-ordem: ");
 					pre_ordem(root);
+					printf("\n\n");
 					op=0;
 					break;
 			
 			case 5: system("clear||cls");
-					printf("Em-ordem: \n\n");
+					printf("\tEm-ordem: ");
 					em_ordem(root);
+					printf("\n\n");
 					op=0;
 					break;
 					
 			case 6: system("clear||cls");
-					printf("Pos-ordem: \n\n");
+					printf("\tPos-ordem: ");
 					pos_ordem(root);
+					printf("\n\n");
 					op=0;
 					break;
 					
 			case 7: system("clear||cls");
+					printf("Tem certeza que deseja excluir todos os livros? (1-SIM, 2-NAO)\n");
+					scanf("%d", &op);
+					system("clear||cls");
+					if(op==1){
+						root=free_tree(root);
+						printf("\tTodos os livros foram excluidos!\n\n");
+					} 
+					op=0;
+					break;
+					
+			case 8: system("clear||cls");
 					root= test(root);
-					printf("Teste carregado! \n\n");
+					printf("\tTeste carregado! \n\n");
 					op=0;
 					break;		
 			
-			case 8: break;
+			case 9: root=free_tree(root);
+					break;
                
             default:system("clear||cls");
 					op=0;
@@ -142,6 +160,13 @@ Nodo* insert(Nodo *root, int data){
 	} 
 	
 	return root;
+}
+
+int requestData(){
+	int data;
+	printf("Digite o codigo do livro\n");
+	scanf("%d", &data);
+	return data;
 }
 
 Nodo* del(Nodo* root, int data){
@@ -202,13 +227,6 @@ Nodo* search(Nodo* root, int data){
 	}
 	
 	return root;
-}
-
-int requestData(){
-	int data;
-	printf("Digite o codigo do livro\n");
-	scanf("%d", &data);
-	return data;
 }
 
 void printSearch(Nodo* nodo){
@@ -277,4 +295,15 @@ Nodo* test(Nodo* root){
 	root= del(root, 5);
 	
 	return root;
+}
+
+Nodo* free_tree(Nodo* root){
+	//algoritmo do pos_ordem
+	//free() no lugar de printf()
+	if(root != NULL){
+	    free_tree(root->left);
+	    free_tree(root->right);
+	    free(root);
+ 	}
+ 	return NULL;
 }
