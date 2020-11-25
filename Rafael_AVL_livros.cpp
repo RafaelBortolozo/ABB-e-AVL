@@ -2,42 +2,52 @@
 #include <stdlib.h>
 #include <cstdlib> //necessario para limpar o terminal
 #include <conio.h> //biblioteca de desenvolvimento
+#include <string.h> //necessario para usar string
+#define QTDCARACTERES 60
 
 /* Aluno: Rafael Bortolozo 
    Arvore AVL
 */
 
+typedef struct sBook{
+	char name[QTDCARACTERES];
+	int issn;
+}Book;
+
 typedef struct sNodo{
 	struct sNodo* left;
 	struct sNodo* right;
-	int data;
+	Book* book;
 	int height;
 }Nodo;
 
-Nodo* createNodo();					 //cria nodo
-Nodo* insert(Nodo* root, int data);  //insere livro
-int requestData();					 //solicita codigo do livro
-Nodo* del(Nodo* root, int data);	 //delete livro
-Nodo* search(Nodo* root, int data);  //pesquisa livro
-void printSearch(Nodo*);		     //imprime pesquisa
-Nodo* searchMax(Nodo* root);		 //Procura maior elemento
-void pre_ordem (Nodo* root);		 //Pre-ordem
-void em_ordem (Nodo* root);			 //Em-ordem
-void pos_ordem (Nodo* root);		 //Pos-ordem
-Nodo* test(Nodo* root);				 //carrega teste
-Nodo* free_tree(Nodo* root);		 //libera memoria
-Nodo* rightRotate(Nodo* root);		 //rotacao para a direita
-Nodo* leftRotate(Nodo* root);		 //rotacao para a esquerda
-int max(int a, int b);				 //retorna o maior numero
-int height(Nodo* N);         		 //retorna a altura da arvore
-int getBalance(Nodo* node);			 //retorna o fator de balanceamento
-Nodo* leftRotate(Nodo* x);			 //rotacao esquerda
-Nodo* rightRotate(Nodo* y);			 //rotacao direita
+Nodo* createNodo();					 			//cria nodo
+Book* createBook();					 			//cria livro
+Nodo* insert(Nodo* root, char* name, int issn); //insere livro
+char* requestName();				 			//solicita nome do livro
+int requestIssn();					 			//solicita ISSN do livro
+Nodo* del(Nodo* root, int issn);	 			//delete livro
+Nodo* search(Nodo* root, int issn);  			//pesquisa livro
+void printSearch(Nodo* nodo);		 			//imprime pesquisa
+Nodo* searchMax(Nodo* root);		 			//Procura maior elemento
+void preOrder (Nodo* root);			 			//Pre-ordem
+void inOrder (Nodo* root);			 			//Em-ordem
+void posOrder (Nodo* root);		 	 			//Pos-ordem
+Nodo* test(Nodo* root);				 			//carrega teste
+Nodo* free_tree(Nodo* root);		 			//libera memoria
+Nodo* rightRotate(Nodo* root);		 			//rotacao para a direita
+Nodo* leftRotate(Nodo* root);		 			//rotacao para a esquerda
+int max(int a, int b);				 			//retorna o maior numero
+int height(Nodo* N);         		 			//retorna a altura da arvore
+int getBalance(Nodo* root);			 			//retorna o fator de balanceamento
+Nodo* leftRotate(Nodo* root);		 			//rotacao esquerda
+Nodo* rightRotate(Nodo* root);		 			//rotacao direita
 
 main(){
 	Nodo* root= NULL;
 	Nodo* aux;
-	int data;
+	char name[QTDCARACTERES];
+	int issn;
 	int op=0;
 	
 	while(op==0){
@@ -55,52 +65,53 @@ main(){
         scanf("%d",&op);
         switch (op){
             case 1: system("clear||cls");
-					data= requestData();
+					strcpy(name, requestName());
+					issn= requestIssn();
 					system("clear||cls");
-					root= insert(root, data);
+					root= insert(root, name, issn);
 					printf("\tLivro cadastrado com sucesso!\n\n");
 					op=0;
                     break;
 			
 			case 2: system("clear||cls");
-					data= requestData();
+					issn= requestIssn();
 					system("clear||cls");
-					aux=search(root, data);
+					aux=search(root, issn);
 					if(aux!=NULL){
-						root= del(root, data);
-						printf("\tLivro \"%d\" removido!", data);
+						root= del(root, issn);
+						printf("\tLivro \"%d\" removido!", issn);
 					}else{
-						printf("\tLivro nao encontrado!", data);
+						printf("\tLivro \"%d\" nao encontrado!", issn);
 					}
                     op=0;
                     printf("\n\n");
 					break;
                     
 			case 3: system("clear||cls");
-					data= requestData();
+					issn= requestIssn();
 					system("clear||cls");
-					aux= search(root, data);
+					aux= search(root, issn);
 					printSearch(aux);
 					op=0;
 					break;
 			
 			case 4: system("clear||cls");
-					printf("\tPre-ordem: ");
-					pre_ordem(root);
+					printf("\tPre-ordem: \n");
+					preOrder(root);
 					printf("\n\n");
 					op=0;
 					break;
 			
 			case 5: system("clear||cls");
-					printf("\tEm-ordem: ");
-					em_ordem(root);
+					printf("\tEm-ordem: \n");
+					inOrder(root);
 					printf("\n\n");
 					op=0;
 					break;
 					
 			case 6: system("clear||cls");
-					printf("\tPos-ordem: ");
-					pos_ordem(root);
+					printf("\tPos-ordem: \n");
+					posOrder(root);
 					printf("\n\n");
 					op=0;
 					break;
@@ -136,27 +147,34 @@ Nodo* createNodo(){
 	Nodo* nodo = (Nodo*)malloc(sizeof(Nodo));
     nodo->left = NULL;
     nodo->right = NULL;
-    nodo->data = NULL;
+    nodo->book = createBook();
     nodo->height=1;
     return nodo;
 }
 
-Nodo* insert(Nodo *root, int data){
+Book* createBook(){
+	Book* book=(Book*)malloc(sizeof(Book));
+	book->issn= NULL;
+	return book;
+}
+
+Nodo* insert(Nodo *root, char* name, int issn){
     
 	//Caso encontrar um espaço vazio, o nodo é inserido e finaliza o codigo
 	if(root == NULL){
         Nodo* aux= createNodo();
-        aux->data = data;
+        strcpy(aux->book->name, name);
+		aux->book->issn = issn;
         return aux;
     }
     
     //caso nao foi encontrado um espaço vazio, continua a percorrer a arvore através da recursividade
-    if(data <= root->data){
-        root->left = insert(root->left, data); //percorre a arvore atraves do insert, até encontrar um ponteiro LEFT ou RIGHT que seja NULL
+    if(issn <= root->book->issn){
+        root->left = insert(root->left, name, issn); //percorre a arvore atraves do insert, até encontrar um ponteiro LEFT ou RIGHT que seja NULL
     }
     
-	else if(data > root->data){
-	    root->right = insert(root->right, data);
+	else if(issn > root->book->issn){
+	    root->right = insert(root->right, name, issn);
 	}
 	
 	else{
@@ -173,21 +191,21 @@ Nodo* insert(Nodo *root, int data){
 	
 	//se nao for balanceado, sera aplicado a rotacao adequada
 	// Left Left Case 
-    if (balance > 1 && data < root->left->data) 
+    if (balance > 1 && issn < root->left->book->issn) 
         return rightRotate(root); 
   
     // Right Right Case 
-    if (balance < -1 && data > root->right->data) 
+    if (balance < -1 && issn > root->right->book->issn) 
         return leftRotate(root); 
   
     // Left Right Case 
-    if (balance > 1 && data > root->left->data){ 
+    if (balance > 1 && issn > root->left->book->issn){ 
         root->left =  leftRotate(root->left); 
         return rightRotate(root); 
     } 
   
     // Right Left Case 
-    if (balance < -1 && data < root->right->data){ 
+    if (balance < -1 && issn < root->right->book->issn){ 
         root->right = rightRotate(root->right); 
         return leftRotate(root); 
     }
@@ -195,24 +213,31 @@ Nodo* insert(Nodo *root, int data){
 	return root;
 }
 
-int requestData(){
-	int data;
-	printf("Digite o codigo do livro\n");
-	scanf("%d", &data);
-	return data;
+char* requestName(){
+	char name[QTDCARACTERES];
+	printf("Digite o nome do livro: ");
+	scanf(" %[^\n]", &name);
+	return name;
 }
 
-Nodo* del(Nodo* root, int data){
+int requestIssn(){
+	int issn;
+	printf("Digite o ISSN do livro: ");
+	scanf("%d", &issn);
+	return issn;
+}
+
+Nodo* del(Nodo* root, int issn){
 	
     //procurando o elemento
     
 	//avanca para a subarvore da direita 
-    if (data < root->data) 
-        root->left = del(root->left, data); 
+    if (issn < root->book->issn) 
+        root->left = del(root->left, issn); 
   
     //avanca para a subarvore da esquerda 
-    else if( data > root->data ) 
-        root->right = del(root->right, data); 
+    else if(issn > root->book->issn ) 
+        root->right = del(root->right, issn); 
   	
   	//elemento encontrado
     else{ 
@@ -240,10 +265,11 @@ Nodo* del(Nodo* root, int data){
             Nodo* temp = searchMax(root->left); 
   
             //faz uma copia do dado recem-procurado, passando para o root
-            root->data = temp->data; 
+            root->book->issn = temp->book->issn;
+			strcpy(temp->book->name, root->book->name); 
   
             //delete o dado procurado
-            root->left = del(root->left, temp->data); 
+            root->left = del(root->left, temp->book->issn); 
         } 
     } 
   
@@ -281,22 +307,22 @@ Nodo* del(Nodo* root, int data){
     return root; 
 }
 
-Nodo* search(Nodo* root, int data){
+Nodo* search(Nodo* root, int issn){
 	
 	//se nao encontrar o livro, retorna NULL
 	if(root==NULL){
 		return NULL;
 	} 
 	
-	if(root->data == data){
+	if(root->book->issn == issn){
 		return root; //se encontrou, vai retornar o elemento
 	} 
 	
 	//se nao, percorre a arvore usando recursividade
-	else if(data <= root->data){
-		root=search(root->left, data);
+	else if(issn <= root->book->issn){
+		root=search(root->left, issn);
 	}else{
-		root=search(root->right, data);
+		root=search(root->right, issn);
 	}
 	
 	return root;
@@ -306,7 +332,8 @@ void printSearch(Nodo* nodo){
 	if(nodo==NULL){
 		printf("\tLivro inexistente!\n\n");
 	}else{
-		printf("\tLivro \"%d\" encontrado!\n\n", nodo->data);
+		printf("\tLivro encontrado!\n");
+		printf("\t%d- \"%s\" \n\n",nodo->book->issn, nodo->book->name);
 	}
 }
 
@@ -318,37 +345,37 @@ Nodo* searchMax(Nodo* root){
     return aux;
 }
 
-void pre_ordem (Nodo* root){
+void preOrder (Nodo* root){
  	if(root != NULL){
-	    printf("%d ",root->data);
-		pre_ordem(root->left);
-		pre_ordem(root->right);	    
+	    printf("\n\t%d- \"%s\" ",root->book->issn, root->book->name);
+		preOrder(root->left);
+		preOrder(root->right);	    
  	}
 }
 
-void em_ordem (Nodo* root){
+void inOrder (Nodo* root){
  	if(root != NULL){
-	    em_ordem(root->left);
-	    printf("%d ",root->data);
-		em_ordem(root->right);	    
+	    inOrder(root->left);
+	    printf("\n\t%d- \"%s\" ",root->book->issn, root->book->name);
+		inOrder(root->right);	    
  	}
 }
 
-void pos_ordem (Nodo* root){
+void posOrder (Nodo* root){
  	if(root != NULL){
-	    pos_ordem(root->left);
-	    pos_ordem(root->right);
-	    printf("%d ",root->data);
+	    posOrder(root->left);
+	    posOrder(root->right);
+	    printf("\n\t%d- \"%s\" ",root->book->issn, root->book->name);
  	}
 }
 
 Nodo* test(Nodo* root){
-	root= insert(root, 10);
+	/*root= insert(root, 10);
 	root= insert(root, 20);
 	root= insert(root, 30);
 	root= insert(root, 40);
 	root= insert(root, 50);
-	root= insert(root, 25);
+	root= insert(root, 25);*/
 	
 	/*root= insert(root, 5);
 	root= insert(root, 12);
@@ -393,11 +420,11 @@ int height(Nodo* node){
     return node->height;
 } 
 
-int getBalance(Nodo* node){ 
-    if (node == NULL){
+int getBalance(Nodo* root){ 
+    if (root == NULL){
     	return 0;
 	}
-    return height(node->left) - height(node->right); 
+    return height(root->left) - height(root->right); 
 } 
 
 Nodo* rightRotate(Nodo *root){ 
