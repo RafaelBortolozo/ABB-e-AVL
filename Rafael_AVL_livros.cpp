@@ -30,10 +30,9 @@ Nodo* del(Nodo* root, int issn);	 			//delete livro
 Nodo* search(Nodo* root, int issn);  			//pesquisa livro
 void printSearch(Nodo* nodo);		 			//imprime pesquisa
 Nodo* searchMax(Nodo* root);		 			//Procura maior elemento
-void preOrder (Nodo* root);			 			//Pre-ordem
-void inOrder (Nodo* root);			 			//Em-ordem
-void posOrder (Nodo* root);		 	 			//Pos-ordem
-Nodo* test(Nodo* root);				 			//carrega teste
+void preOrder (Nodo* root);			 			//impressao Pre-ordem
+void inOrder (Nodo* root);			 			//impressao Em-ordem
+void posOrder (Nodo* root);		 	 			//impressao Pos-ordem
 Nodo* free_tree(Nodo* root);		 			//libera memoria
 Nodo* rightRotate(Nodo* root);		 			//rotacao para a direita
 Nodo* leftRotate(Nodo* root);		 			//rotacao para a esquerda
@@ -59,8 +58,7 @@ main(){
         printf("\t5)Em-ordem\n");
         printf("\t6)Pos-ordem\n");
         printf("\t7)Limpar sistema\n");
-        printf("\t8)TEST\n");
-        printf("\t9)Sair\n");
+        printf("\t8)Sair\n");
         
         scanf("%d",&op);
         switch (op){
@@ -127,14 +125,8 @@ main(){
 					op=0;
 					break;
 					
-			case 8: system("clear||cls");
-					root= test(root);
-					printf("\tTeste carregado! \n\n");
-					op=0;
+			case 8: root=free_tree(root);
 					break;		
-			
-			case 9: root=free_tree(root);
-					break;
                
             default:system("clear||cls");
 					op=0;
@@ -367,35 +359,6 @@ void posOrder (Nodo* root){
 	    posOrder(root->right);
 	    printf("\n\t%d- \"%s\" ",root->book->issn, root->book->name);
  	}
-}
-
-Nodo* test(Nodo* root){
-	/*root= insert(root, 10);
-	root= insert(root, 20);
-	root= insert(root, 30);
-	root= insert(root, 40);
-	root= insert(root, 50);
-	root= insert(root, 25);*/
-	
-	/*root= insert(root, 5);
-	root= insert(root, 12);
-	root= insert(root, 2);
-	root= insert(root, 7);
-	root= insert(root, 3);
-	root= insert(root, 1);
-	root= insert(root, 10);
-	root= insert(root, 8);
-	root= insert(root, 9);
-	root= insert(root, 4);
-	root= insert(root, 6);
-	root= insert(root, 11);
-	
-	root= del(root, 11);
-	root= del(root, 8);
-	root= del(root, 12);
-	root= del(root, 5);*/
-	
-	return root;
 }
 
 Nodo* free_tree(Nodo* root){
