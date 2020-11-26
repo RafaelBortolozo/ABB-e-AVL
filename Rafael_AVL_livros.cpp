@@ -28,7 +28,7 @@ Nodo* avlInsert(Nodo* root, int issn);				//AVL no insert()
 char* requestName();				 			    //solicita nome do livro
 int requestIssn();					 		        //solicita ISSN do livro
 Nodo* deleteNode(Nodo* root, int issn);	 			//delete livro
-Nodo* avlDelete(Nodo* root);						//AVL no insert()
+Nodo* avlDelete(Nodo* root);						//AVL no delete()
 Nodo* search(Nodo* root, int issn);  			    //pesquisa livro
 void printSearch(Nodo* nodo);		 			    //imprime pesquisa
 Nodo* searchMax(Nodo* root);		 			    //Procura maior elemento
