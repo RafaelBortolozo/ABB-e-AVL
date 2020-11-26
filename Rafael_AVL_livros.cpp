@@ -21,26 +21,26 @@ typedef struct sNodo{
 	int height;
 }Nodo;
 
-Nodo* createNodo();					 			//cria nodo
-Book* createBook();					 			//cria livro
-Nodo* insert(Nodo* root, char* name, int issn); //insere livro
-char* requestName();				 			//solicita nome do livro
-int requestIssn();					 			//solicita ISSN do livro
-Nodo* del(Nodo* root, int issn);	 			//delete livro
-Nodo* search(Nodo* root, int issn);  			//pesquisa livro
-void printSearch(Nodo* nodo);		 			//imprime pesquisa
-Nodo* searchMax(Nodo* root);		 			//Procura maior elemento
-void preOrder (Nodo* root);			 			//impressao Pre-ordem
-void inOrder (Nodo* root);			 			//impressao Em-ordem
-void posOrder (Nodo* root);		 	 			//impressao Pos-ordem
-Nodo* free_tree(Nodo* root);		 			//libera memoria
-Nodo* rightRotate(Nodo* root);		 			//rotacao para a direita
-Nodo* leftRotate(Nodo* root);		 			//rotacao para a esquerda
-int max(int a, int b);				 			//retorna o maior numero
-int height(Nodo* N);         		 			//retorna a altura da arvore
-int getBalance(Nodo* root);			 			//retorna o fator de balanceamento
-Nodo* leftRotate(Nodo* root);		 			//rotacao esquerda
-Nodo* rightRotate(Nodo* root);		 			//rotacao direita
+Nodo* createNodo();					 			    //cria nodo
+Book* createBook();					 			    //cria livro
+Nodo* insertNode(Nodo* root, char* name, int issn); //insere livro
+Nodo* avlInsert(Nodo* root, int issn);				//AVL no insert()
+char* requestName();				 			    //solicita nome do livro
+int requestIssn();					 		        //solicita ISSN do livro
+Nodo* deleteNode(Nodo* root, int issn);	 			//delete livro
+Nodo* avlDelete(Nodo* root);						//AVL no insert()
+Nodo* search(Nodo* root, int issn);  			    //pesquisa livro
+void printSearch(Nodo* nodo);		 			    //imprime pesquisa
+Nodo* searchMax(Nodo* root);		 			    //Procura maior elemento
+void preOrder (Nodo* root);			 			    //impressao Pre-ordem
+void inOrder (Nodo* root);			 			    //impressao Em-ordem
+void posOrder (Nodo* root);		 	 			    //impressao Pos-ordem
+Nodo* free_tree(Nodo* root);		 			    //libera memoria
+int max(int a, int b);				 			    //retorna o maior numero
+int height(Nodo* N);         		 			    //retorna a altura da arvore
+int getBalance(Nodo* root);			 			    //retorna o fator de balanceamento
+Nodo* leftRotate(Nodo* root);		 			    //rotacao esquerda
+Nodo* rightRotate(Nodo* root);		 			    //rotacao direita
 
 main(){
 	Nodo* root= NULL;
@@ -66,7 +66,7 @@ main(){
 					strcpy(name, requestName());
 					issn= requestIssn();
 					system("clear||cls");
-					root= insert(root, name, issn);
+					root= insertNode(root, name, issn);
 					printf("\tLivro cadastrado com sucesso!\n\n");
 					op=0;
                     break;
@@ -76,7 +76,7 @@ main(){
 					system("clear||cls");
 					aux=search(root, issn);
 					if(aux!=NULL){
-						root= del(root, issn);
+						root= deleteNode(root, issn);
 						printf("\tLivro \"%d\" removido!", issn);
 					}else{
 						printf("\tLivro \"%d\" nao encontrado!", issn);
@@ -150,9 +150,9 @@ Book* createBook(){
 	return book;
 }
 
-Nodo* insert(Nodo *root, char* name, int issn){
+Nodo* insertNode(Nodo *root, char* name, int issn){
     
-	//Caso encontrar um espaço vazio, o nodo é inserido e finaliza o codigo
+	//Caso encontrar um espaco vazio, o nodo eh inserido e finaliza o codigo
 	if(root == NULL){
         Nodo* aux= createNodo();
         strcpy(aux->book->name, name);
@@ -160,26 +160,23 @@ Nodo* insert(Nodo *root, char* name, int issn){
         return aux;
     }
     
-    //caso nao foi encontrado um espaço vazio, continua a percorrer a arvore através da recursividade
-    if(issn <= root->book->issn){
-        root->left = insert(root->left, name, issn); //percorre a arvore atraves do insert, até encontrar um ponteiro LEFT ou RIGHT que seja NULL
-    }
-    
-	else if(issn > root->book->issn){
-	    root->right = insert(root->right, name, issn);
-	}
-	
-	else{
-		return root;
-	}
+    //caso nao foi encontrado um espaco vazio, continua a percorrer a arvore atraves da recursividade
+    //percorre a arvore atraves do insert, ate encontrar um ponteiro LEFT ou RIGHT que seja NULL
+    if(issn <= root->book->issn) root->left = insertNode(root->left, name, issn); 
+	else if(issn > root->book->issn) root->right = insertNode(root->right, name, issn);
+	else return root;
 	
 	//apos a insercao...
+	root= avlInsert(root, issn); //aplicacao da AVL
+	return root;
+}
+
+Nodo* avlInsert(Nodo* root, int issn){
 	//atualiza altura dos nodos
 	root->height = 1 + max(height(root->left), height(root->right));
 	
 	//obtem o fator de balanceamento do nodo
 	int balance= getBalance(root);
-	
 	
 	//se nao for balanceado, sera aplicado a rotacao adequada
 	// Left Left Case 
@@ -201,10 +198,11 @@ Nodo* insert(Nodo *root, char* name, int issn){
         root->right = rightRotate(root->right); 
         return leftRotate(root); 
     }
-	
-	return root;
+    
+    return root;
 }
 
+//solicita o nome do livro
 char* requestName(){
 	char name[QTDCARACTERES];
 	printf("Digite o nome do livro: ");
@@ -212,6 +210,7 @@ char* requestName(){
 	return name;
 }
 
+//solicita o ISSN do livro
 int requestIssn(){
 	int issn;
 	printf("Digite o ISSN do livro: ");
@@ -219,21 +218,16 @@ int requestIssn(){
 	return issn;
 }
 
-Nodo* del(Nodo* root, int issn){
-	
+Nodo* deleteNode(Nodo* root, int issn){
     //procurando o elemento
-    
 	//avanca para a subarvore da direita 
-    if (issn < root->book->issn) 
-        root->left = del(root->left, issn); 
+    if (issn < root->book->issn) root->left = deleteNode(root->left, issn); 
   
     //avanca para a subarvore da esquerda 
-    else if(issn > root->book->issn ) 
-        root->right = del(root->right, issn); 
+    else if(issn > root->book->issn ) root->right = deleteNode(root->right, issn); 
   	
   	//elemento encontrado
     else{ 
-    	
         //nodo com apenas 1 filho ou nenhum
         if((root->left == NULL) || (root->right == NULL)){ 
             Nodo *temp = root->left ? root->left : root->right; 
@@ -245,38 +239,36 @@ Nodo* del(Nodo* root, int issn){
             }
 			
 			//apenas 1 filho
-			else{
-				*root = *temp;
-			} 
-			 
+			else *root = *temp;
             free(temp); 
-        } 
-        
-		else{ 
+        }else{ 
             //nodo com 2 filhos, procura o maior elemento da subarvore da esquerda 
             Nodo* temp = searchMax(root->left); 
   
-            //faz uma copia do dado recem-procurado, passando para o root
+            //faz uma copia do elemento recem-procurado, passando para o root
             root->book->issn = temp->book->issn;
-			strcpy(temp->book->name, root->book->name); 
+			strcpy(root->book->name, temp->book->name); 
   
-            //delete o dado procurado
-            root->left = del(root->left, temp->book->issn); 
+            //delete o elemento procurado
+            root->left = deleteNode(root->left, temp->book->issn); 
         } 
-    } 
-  
-    //se a arvore ficou vazia, entao retorne 
-    if (root == NULL) 
-      return root; 
-  
-    //atualiza altura dos nodos
+    }
+    
+    //apos a exclusao...
+    if (root == NULL) return root; //se a arvore ficou vazia, entao retorne 
+    root= avlDelete(root); //aplicacao da AVL
+    return root; 
+}
+
+Nodo* avlDelete(Nodo* root){
+	//atualiza altura dos nodos
     root->height = 1 + max(height(root->left), height(root->right)); 
   
     //obtem o fator de balanceamento do nodo
-    int balance = getBalance(root); 
-  
-   	//se nao for balanceado, sera aplicado a rotacao adequada 
-    // Left Left Case 
+    int balance = getBalance(root);
+	
+	//se nao for balanceado, sera aplicado a rotacao adequada
+	// Left Left Case 
     if (balance > 1 && getBalance(root->left) >= 0) 
         return rightRotate(root); 
   
@@ -294,28 +286,20 @@ Nodo* del(Nodo* root, int issn){
     if (balance < -1 && getBalance(root->right) > 0){ 
         root->right = rightRotate(root->right); 
         return leftRotate(root); 
-    } 
-
-    return root; 
+    }
+    
+    return root;
 }
 
 Nodo* search(Nodo* root, int issn){
-	
 	//se nao encontrar o livro, retorna NULL
-	if(root==NULL){
-		return NULL;
-	} 
+	if(root==NULL) return NULL;
 	
-	if(root->book->issn == issn){
-		return root; //se encontrou, vai retornar o elemento
-	} 
+	if(root->book->issn == issn) return root; //se encontrou, vai retornar o elemento
 	
 	//se nao, percorre a arvore usando recursividade
-	else if(issn <= root->book->issn){
-		root=search(root->left, issn);
-	}else{
-		root=search(root->right, issn);
-	}
+	else if(issn <= root->book->issn) root=search(root->left, issn);
+	else root=search(root->right, issn);
 	
 	return root;
 }
@@ -372,10 +356,12 @@ Nodo* free_tree(Nodo* root){
  	return NULL;
 }
 
+//retorna o maior valor
 int max(int a, int b){
 	return (a > b)? a : b;
 }
 
+//retorna a altura do nodo
 int height(Nodo* node){
 	if (node == NULL){
 		return 0;
@@ -383,6 +369,7 @@ int height(Nodo* node){
     return node->height;
 } 
 
+//calcula o balanceamento
 int getBalance(Nodo* root){ 
     if (root == NULL){
     	return 0;
